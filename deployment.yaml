@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-server-deployment
+  labels:
+    app: simple-server
+spec:
+  selector:
+    matchLabels:
+      app: simple-server
+  replicas: 4
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: simple-server
+    spec:
+      terminationGracePeriodSeconds: 30
+      containers:
+      - name: simple-server
+        imagePullPolicy: Never
+        image: simple-server:v2
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        lifecycle:
+          preStop:
+            exec:
+              command:
+                - /bin/sh
+                - sleep 10
+        livenessProbe:
+          httpGet:
+            path: /
+            port: 8080
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 8080
+        ports:
+        - containerPort: 8080
